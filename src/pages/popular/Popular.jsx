@@ -10,13 +10,13 @@ import noImage from "../../images/no-image.png";
 import { toast } from "react-toastify";
 
 const Popular = ({ filterValues }) => {
-  console.log('filterValues Popular comp:',filterValues);
   const user = JSON.parse(sessionStorage.getItem("user"));
-  // if (user && user.preferences) {
-  //   filterValues = user.preferences;
-  // }
-  
-  const apiKey = process.env.REACT_APP_NEWS_API_KEY; 
+  if (user && user?.preferences && !filterValues) { // prefer user search over user preference
+    if(typeof(user?.preferences) != 'object'){
+      filterValues = JSON.parse(user.preferences);
+    }
+  }
+  const apiKey = process.env.REACT_APP_NEWS_API_KEY;
   const [popular, setPopular] = useState([]);
   const settings = {
     className: "center",
@@ -48,35 +48,13 @@ const Popular = ({ filterValues }) => {
     return formattedDate;
   };
 
-  // Default results
   useEffect(() => {
-    console.log("simple Useeffect called");
-    axios
-      .get(
-        `https://newsapi.org/v2/everything?q=Apple&apiKey=${apiKey}`
-      )
-      .then((response) => {
-        if (response) {
-          setPopular(response?.data?.articles);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-  }, []);
-
-  // Filters result
-  useEffect(() => {
-    console.log("Filtersssssssss Useeffect called");
     if (filterValues) {
-      const searchKeyword = filterValues?.keyword || '';
-      const searchSource = filterValues?.source || '';
-      const searchFrom = filterValues?.from || '';
-      const searchCategory = filterValues?.category || '';
-      axios
-        .get(
-          `https://newsapi.org/v2/top-headlines?q=${searchKeyword}&sources=${searchSource}&from=${searchFrom}&category=${searchCategory}&apiKey=${apiKey}`
-        )
+      const searchKeyword = filterValues?.keyword || "";
+      const searchSource = filterValues?.source || "";
+      const searchFrom = filterValues?.from || "";
+      const searchCategory = filterValues?.category || "";
+      axios.get(`https://newsapi.org/v2/top-headlines?q=${searchKeyword}&sources=${searchSource}&from=${searchFrom}&category=${searchCategory}&apiKey=${apiKey}`)
         .then((response) => {
           if (response) {
             setPopular(response?.data?.articles);
@@ -86,8 +64,17 @@ const Popular = ({ filterValues }) => {
           console.error(error);
           toast(error?.response?.data?.message);
         });
+    } else {
+      axios.get(`https://newsapi.org/v2/everything?q=Apple&apiKey=${apiKey}`).then((response) => {
+          if (response) {
+            setPopular(response?.data?.articles);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
-  }, [filterValues.keyword]);
+  }, [filterValues?.keyword, filterValues?.source, filterValues?.from, filterValues?.category]);
 
   return (
     <>
@@ -113,7 +100,9 @@ const Popular = ({ filterValues }) => {
                     </div>
                     <div className={styles.content}>
                       <div className={styles.text}>
-                        <h1 className={styles.title}>{val?.title?.slice(0, 40)}...</h1>
+                        <h1 className={styles.title}>
+                          {val?.title?.slice(0, 40)}...
+                        </h1>
                         <h5 className={styles.contentDes}>
                           {val?.content?.slice(0, 200)}...
                         </h5>

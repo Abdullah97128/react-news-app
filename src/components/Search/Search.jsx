@@ -20,7 +20,6 @@ const Search = ({ onFilter }) => {
   const handleFilter = (values, { setSubmitting, resetForm }) => {
     onFilter(values);
     setSubmitting(false);
-    resetForm();
   };
 
   const handlePreferences = (values, { setSubmitting, resetForm }) => {
