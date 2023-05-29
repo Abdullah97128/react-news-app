@@ -17,6 +17,17 @@ const Search = ({ onFilter }) => {
   ]; // as only provides 7 categories
   const apiKey = process.env.REACT_APP_NEWS_API_KEY;
 
+  const user = JSON.parse(sessionStorage.getItem("user"));
+  let filterValues = {};
+  if (user?.preferences) {
+    filterValues = typeof user.preferences === 'object' ? user.preferences : JSON.parse(user.preferences);
+  
+    ['keyword', 'category', 'from', 'source'].forEach(prop => {
+      if (filterValues?.[prop] == null) {
+        filterValues[prop] = '';
+      }
+    });
+  }
   const handleFilter = (values, { setSubmitting, resetForm }) => {
     onFilter(values);
     setSubmitting(false);
@@ -43,7 +54,6 @@ const Search = ({ onFilter }) => {
   };
   // sources
   useEffect(() => {
-    console.log("simple Useeffect called");
     axios
       .get(`https://newsapi.org/v2/top-headlines/sources?apiKey=${apiKey}`)
       .then((response) => {
@@ -59,7 +69,7 @@ const Search = ({ onFilter }) => {
   return (
     <>
       <Formik
-        initialValues={{ keyword: "", from: "", category: "", source: "" }}
+        initialValues={{ keyword: "", from: "", category: "", source: "", ...filterValues }}
       >
         {(formikProps) => (
           <Form className={styles.form}>

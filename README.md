@@ -1,3 +1,9 @@
+# Run using docker
+
+docker build -t react-news-app directory-of-project
+
+docker run -d -p 8000:8000 backend-laravel-api
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
